@@ -83,6 +83,43 @@ median(parents$tank.prop[parents$SpawnType=="factorial" & parents$sex=="F"]) #0.
 median(parents$tank.prop[parents$SpawnType=="factorial" & parents$sex=="M"]) #0.32
 
 
+#### Test for differences between strategies ####
+
+#Wilcoxon rank-sum test
+# - paired=F causes the Wilcoxon test to be a rank-sum test (AKA Mann-Whitney test) to work with unpaired data
+
+#PC
+wilcox.test(pc$tank.prop[pc$SpawnType=="pooled"],pc$tank.prop[pc$SpawnType=="factorial"],
+            paired=F,alternative="two.sided")
+#    Wilcoxon rank sum test with continuity correction
+#
+#data:  pc$tank.prop[pc$SpawnType == "pooled"] and pc$tank.prop[pc$SpawnType == "factorial"]
+#W = 3127.5, p-value = 0.008227
+#alternative hypothesis: true location shift is not equal to 0
+
+#dams
+wilcox.test(parents$tank.prop[parents$SpawnType=="pooled" & parents$sex=="F"],
+            parents$tank.prop[parents$SpawnType=="factorial" & parents$sex=="F"],
+            paired=F,alternative="less")
+# Wilcoxon rank sum test with continuity correction
+#
+# data:  parents$tank.prop[parents$SpawnType == "pooled" & parents$sex == "F"] and parents$tank.prop[parents$SpawnType == "factorial" & parents$sex == "F"]
+# W = 404, p-value = 0.5011
+# alternative hypothesis: true location shift is not equal to 0
+
+
+#sires
+wilcox.test(parents$tank.prop[parents$SpawnType=="pooled" & parents$sex=="M"],
+            parents$tank.prop[parents$SpawnType=="factorial" & parents$sex=="M"],
+            paired=F,alternative="two.sided")
+# Wilcoxon rank sum test with continuity correction
+#
+# data:  parents$tank.prop[parents$SpawnType == "pooled" & parents$sex == "M"] and parents$tank.prop[parents$SpawnType == "factorial" & parents$sex == "M"]
+# W = 429.5, p-value = 0.7674
+# alternative hypothesis: true location shift is not equal to 0
+
+
+
 
 #### Chi-square test for deviation from expected even contribution ####
 #Chi-square test - compare observed to expected frequencies 
@@ -231,6 +268,51 @@ sd(Ne.df$Nes[Ne.df$SpawnType=="pooled"])
 
 
 
+##### T-test for differences in Ne between methods ####
+
+#Ne
+t.test(Ne.df$NeObs[Ne.df$SpawnType=="pooled"],Ne.df$NeObs[Ne.df$SpawnType=="factorial"],alternative="two.sided")
+# Welch Two Sample t-test
+#
+# data:  Ne.df$NeObs[Ne.df$SpawnType == "pooled"] and Ne.df$NeObs[Ne.df$SpawnType == "factorial"]
+# t = -4.7442, df = 11.512, p-value = 0.0005341
+# alternative hypothesis: true difference in means is not equal to 0
+# 95 percent confidence interval:
+#   -2.3647244 -0.8714756
+# sample estimates:
+#   mean of x mean of y
+# 3.8959    5.5140
+
+#Ned
+t.test(Ne.df$Ned[Ne.df$SpawnType=="pooled"],Ne.df$Ned[Ne.df$SpawnType=="factorial"],alternative="two.sided")
+# Welch Two Sample t-test
+#
+# data:  Ne.df$Ned[Ne.df$SpawnType == "pooled"] and Ne.df$Ned[Ne.df$SpawnType == "factorial"]
+# t = -2.5191, df = 12.431, p-value = 0.02636
+# alternative hypothesis: true difference in means is not equal to 0
+# 95 percent confidence interval:
+#   -1.15568305 -0.08591695
+# sample estimates:
+#   mean of x mean of y
+# 2.0342    2.6550
+
+#Nes
+t.test(Ne.df$Nes[Ne.df$SpawnType=="pooled"],Ne.df$Nes[Ne.df$SpawnType=="factorial"],alternative="two.sided")
+# Welch Two Sample t-test
+#
+# data:  Ne.df$Nes[Ne.df$SpawnType == "pooled"] and Ne.df$Nes[Ne.df$SpawnType == "factorial"]
+# t = -3.8857, df = 9.613, p-value = 0.003264
+# alternative hypothesis: true difference in means is not equal to 0
+# 95 percent confidence interval:
+#   -1.265346 -0.339854
+# sample estimates:
+#   mean of x mean of y
+# 2.0883    2.8909
+
+
+
+
+
 #### Ne of release ####
 
 ##Add the estimated number of larvae to Ne.df
@@ -328,7 +410,8 @@ sd(parents$tank.prop[parents$SpawnType=="factorial" & parents$sex=="M"]) #0.0672
 boxplot(tank.prop ~ SpawnType,data=pc,ylim=c(0,1),xaxt="n",yaxt="n",
         border=rgb(120/255,120/255,120/255),
         main="",xlab="",ylab="")
-axis(1,at=1:2,labels=c("pooled","factorial"),tick=F,line=-0.5)
+axis(1,at=1,labels="pooled",tick=F,line=-0.5)
+axis(1,at=2,labels="partial-\nfactorial",tick=F,line=0)
 axis(2,at=seq(0,1,by=0.2),las=1,cex.axis=0.8)
 title(ylab="Proportion of offspring per PC",line=2.5)
 abline(h=1/9,lty=2)
@@ -343,7 +426,7 @@ boxplot(tank.prop ~ sex + SpawnType,data=parents,xaxt="n",yaxt="n",
         col=c(rgb(220/255,50/255,31/255,alpha=0.75),rgb(0/255,90/255,181/255,alpha=0.75),
               rgb(220/255,50/255,31/255,alpha=0.75),rgb(0/255,90/255,181/255,alpha=0.75)),
         border=c("#DC3220","#005AB5","#DC3220","#005AB5"))
-axis(1,at=c(1.5,3.5),labels=c("pooled","factorial"),tick=F,line=-0.5)
+axis(1,at=c(1.5,3.5),labels=c("pooled","partial-factorial"),tick=F,line=-0.5)
 axis(2,at=seq(0,1,by=0.2),las=1,cex.axis=0.8)
 title(ylab="Proportion of offspring per parent",line=2.5)
 abline(h=1/3,lty=2)
@@ -361,6 +444,7 @@ for (i in 1:10){
   barplot(x$tank.prop,ylim=c(0,1),border=F,
           main=paste("Pooled",i),ylab="Prop. offspring per PC",
           names.arg=c("PC 1","PC 2","PC 3","PC 4","PC 5","PC 6","PC 7","PC 8","PC 9"),las=2)
+  title(xlab="Pair crosses",line=3.5)
   abline(h=1/9,lty=2)
 }
 par(mfrow=c(1,1))
@@ -375,6 +459,7 @@ for (i in 1:10){
   barplot(x$tank.prop,ylim=c(0,1),border=F,
           main=paste("Factorial",i),ylab="Prop. offspring per PC",
           names.arg=c("PC 1","PC 2","PC 3","PC 4","PC 5","PC 6","PC 7","PC 8","PC 9"),las=2)
+  title(xlab="Pair crosses",line=3.5)
   abline(h=1/9,lty=2)
 }
 par(mfrow=c(1,1))
@@ -395,6 +480,7 @@ for (i in 1:10){
                 rgb(0/255,90/255,181/255,alpha=0.75),rgb(0/255,90/255,181/255,alpha=0.75),rgb(0/255,90/255,181/255,alpha=0.75)),
           names.arg=substr(x$ParentID,1,4),las=2)
   title(main=paste("Pooled",i),adj=0)
+  title(xlab="Parents",line=3.5)
   abline(h=1/3,lty=2)
 }
 par(mfrow=c(1,1))
@@ -411,6 +497,7 @@ for (i in 1:10){
                 rgb(0/255,90/255,181/255,alpha=0.75),rgb(0/255,90/255,181/255,alpha=0.75),rgb(0/255,90/255,181/255,alpha=0.75)),
           names.arg=substr(x$ParentID,1,4),las=2)
   title(main=paste("Factorial",i),adj=0)
+  title(xlab="Parents",line=3.5)
   abline(h=1/3,lty=2)
 }
 par(mfrow=c(1,1))
@@ -425,7 +512,8 @@ boxplot(NeObs ~ SpawnType,data=Ne.df,xaxt="n",yaxt="n",ylim=c(0.22,6),
         border=rgb(120/255,120/255,120/255),
         main="",xlab="",ylab="")
         #main="",xlab="",ylab=expression("N"*italic(""[e])~"in replicates"))
-axis(1,at=1:2,labels=c("pooled","factorial"),tick=F,line=-0.5)
+axis(1,at=1,labels="pooled",tick=F,line=-0.5)
+axis(1,at=2,labels="partial-\nfactorial",tick=F,line=0)
 axis(2,at=0:6,labels=NA)
 axis(2,at=c(0,2,4,6),las=1,tick=F)
 title(ylab=expression(italic("N"[e])~"in multi-family crosses"),line=2.5)
@@ -449,7 +537,7 @@ boxplot(value ~ sex + SpawnType,data=Ne.long,xaxt="n",yaxt="n",ylim=c(0.11,3),
         col=c(rgb(220/255,50/255,31/255,alpha=0.75),rgb(0/255,90/255,181/255,alpha=0.75),
               rgb(220/255,50/255,31/255,alpha=0.75),rgb(0/255,90/255,181/255,alpha=0.75)),
         border=c("#DC3220","#005AB5","#DC3220","#005AB5"))
-axis(1,at=c(1.5,3.5),labels=c("pooled","factorial"),tick=F,line=-0.5)
+axis(1,at=c(1.5,3.5),labels=c("pooled","partial-factorial"),tick=F,line=-0.5)
 axis(2,at=0:3,las=1)
 title(ylab=expression(italic("N"[ed])*" and "*italic("N"[es])*~"in multi-family crosses   "),line=2.5)
 abline(h=3,lty=2)
